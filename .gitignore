@@ -1,0 +1,5 @@
+node_modules
+*.js
+dist
+*-lock.json
+!jest.config.js
