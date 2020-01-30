@@ -1,14 +1,12 @@
 import { Router } from 'express';
-import { createProduct } from '../controllers/products';
+import { createProduct, getProduct, getProducts } from '../controllers/products';
 const router = Router();
 
 router.post('/', createProduct);
 
-router.get('/:code', (req, resp) => {
-    resp.json({message: 'ok'});
-});
+router.get('/:code', getProduct);
 
-router.get('/');
+router.get('/', getProducts);
 
 router.patch('/:code');
 
