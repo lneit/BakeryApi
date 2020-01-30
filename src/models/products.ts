@@ -4,5 +4,5 @@ export interface PackagingOption {
 };
 
 export class Product {
-    constructor(public code: string, name: string, packagingOptions: PackagingOption[]) {}
+    constructor(public code: string, public name: string, public packagingOptions: PackagingOption[]) {}
 }
