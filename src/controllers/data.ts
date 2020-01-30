@@ -1,8 +1,8 @@
 import { Product } from '../models/products';
 
-
+// A primitive implementation of Products data store
 export class Products {
-    constructor(public products: Product[] = []) {}
+    constructor(private products: Product[] = []) {}
 
     getAll(): Product[] {
         return this.products;
@@ -17,8 +17,14 @@ export class Products {
     }
 
     delete(code: string): void {
+        this.products = this.products.filter(product => product.code !== code);
+    }
+
+    update(product: Product): void {
+        const filtered = this.products.filter(el => el.code !== product.code);
         this.products = [
-            ...this.products.filter(product => product.code === code)
+            ...filtered,
+            product
         ];
     }
 }

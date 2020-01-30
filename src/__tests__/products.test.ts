@@ -128,6 +128,8 @@ describe('Test products POST endpoint', () => {
 });
 
 describe('Test products PATCH endpoint', () => {
+    const updateProductSpy = jest.spyOn(products, 'update').mockImplementation();
+
     const updatedProduct = {
         ...PRODUCT1,
         packaging_options: [
@@ -138,76 +140,77 @@ describe('Test products PATCH endpoint', () => {
         ]
     };
     it('Test product update, successful', async done => {
-        const updatedProduct = {
-            ...PRODUCT1,
-            packaging_options: [
-                {
-                    count: 8,
-                    price: 10.99
-                }
-            ]
-        };
         const {code, name, packaging_options} = PRODUCT1;
         jest.spyOn(products, 'get').mockReturnValue(
             new Product(code, name, packaging_options));
 
         const resp = await request
-            .patch(`${baseURL}/products/${PRODUCT1.code}`)
+            .patch(`${baseURL}/products/${updatedProduct.code}`)
             .send(updatedProduct)
             .set('Accept', 'application/json');
 
+        expect(updateProductSpy).toBeCalled();
         expect(resp.status).toBe(200);
-        // expect(PRODUCTS.length).toBe(2);
-        // expect(PRODUCTS[0].code).toBe('VS');
-        // expect(PRODUCTS[0].packagingOptions.length).toBe(1);
-        // expect(PRODUCTS[0].packagingOptions[0].count).toBe(8);
-        // expect(PRODUCTS[0].packagingOptions[0].price).toBe(10.99);
+        expect(resp.body.message).toContain('Updated the product');
+        expect(resp.body.code).toBe(updatedProduct.code);
         done();
     });
-    it('Test product update, product not found', async done => {
+    it('Test product update, product code parameter does not match the product in the body', async done => {
         jest.spyOn(products, 'get').mockReturnValue(undefined);
         const resp = await request
             .patch(`${baseURL}/products/NNN`)
             .send(updatedProduct)
             .set('Accept', 'application/json');
 
+        expect(updateProductSpy).not.toBeCalled();
         expect(resp.status).toBe(422);
+        expect(resp.body.message).toContain('Product code request parameter does not match');
+        expect(resp.body.code).toBe('NNN');
         done();
     });
-    it('Test product update, path not found', async done => {
+    it('Test product update for a non existing product', async done => {
+        jest.spyOn(products, 'get').mockReturnValue(undefined);
         const resp = await request
-            .patch(`${baseURL}/products`)
+            .patch(`${baseURL}/products/${updatedProduct.code}`)
             .send(updatedProduct)
             .set('Accept', 'application/json');
 
-        expect(resp.status).toBe(404);
+        expect(updateProductSpy).not.toBeCalled();
+        expect(resp.status).toBe(422);
+        expect(resp.body.message).toContain('Could not find a product');
+        expect(resp.body.code).toBe(updatedProduct.code);
         done();
     });
 });
 
 describe('Test products DELETE endpoint', () => {
+    const deleteProductSpy = jest.spyOn(products, 'delete').mockImplementation();
+
     it('Test deletion of a product, successful', async done => {
+        const {code, name, packaging_options} = PRODUCT1;
+        jest.spyOn(products, 'get').mockReturnValue(
+            new Product(code, name, packaging_options));
+
         const resp = await request
-            .delete(`${baseURL}/products/${PRODUCT1.code}`)
+            .delete(`${baseURL}/products/${code}`)
             .set('Accept', 'application/json');
 
+        expect(deleteProductSpy).toBeCalledTimes(1);
         expect(resp.status).toBe(200);
-        done();
-    });
-    it('Test deletion of a product with only one product in the list, successful', async done => {
-        const resp = await request
-            .delete(`${baseURL}/products/VS`)
-            .set('Accept', 'application/json');
-
-        expect(resp.status).toBe(200);
+        expect(resp.body.code).toBe(code);
+        expect(resp.body.message).toBe('Deleted the product');
         done();
     });
     it('Test deletion of a product that does not exist', async done => {
+        jest.spyOn(products, 'get').mockReturnValue(undefined);
         const resp = await request
             .delete(`${baseURL}/products/MMM`)
             .set('Accept', 'application/json');
 
+        expect(deleteProductSpy).not.toBeCalled();
         expect(resp.status).toBe(422);
+        expect(resp.body.code).toBe('MMM');
+        expect(resp.body.message).toBe('Could not find a product');
         done();
     });
 });
