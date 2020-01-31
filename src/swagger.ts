@@ -1,4 +1,9 @@
-import { getProducts } from './openAPI/products.swagger';
+import { 
+    getProducts, 
+    createProduct, 
+    getProduct,
+    updateProduct,
+    deleteProduct } from './openAPI/products.swagger';
 
 export const swaggerDocument = {
     openapi: '3.0.1',
@@ -30,7 +35,13 @@ export const swaggerDocument = {
     ],
     paths: {
         "/products": {
-            "get": getProducts
-        }
+            "get": getProducts,
+            "post": createProduct
+        },
+        "/products/{code}": {
+            "get": getProduct,
+            "patch": updateProduct,
+            "delete": deleteProduct
+        },
     }
 }
