@@ -1,7 +1,7 @@
 import express, { Request, Response, NextFunction } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import { json } from 'body-parser';
-import { swaggerDocument } from './swagger';
+import * as swaggerDocument from './swagger.json';
 import productRoutes from './routes/products';
 
 const app = express();

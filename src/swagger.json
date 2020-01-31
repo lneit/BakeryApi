@@ -1,0 +1,275 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "version": "1.0.0",
+        "title": "Bakery APIs Document",
+        "description": "These API-s help a bakery manage their products and serve orders",
+        "termsOfService": "",
+        "contact": {
+            "name": "Paige Turner",
+            "email": "paige.turner@gmail.com",
+            "url": "https://paigeturner.any"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+        }
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3001/api/v1",
+            "description": "Local server"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Products"
+        }
+    ],
+    "paths": {
+        "/products": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "description": "Returns all available products in the bakery.",
+                "operationId": "getProducts",
+                "responses": {
+                    "200": {
+                        "description": "A list of products.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/Products"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Products"
+                ],
+                "description": "Creates a new product in the bakery.",
+                "operationId": "createProduct",
+                "requestBody": {
+                    "description": "Product Object",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/definitions/Product"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful create product response.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/Result"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/Result"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/products/{code}": {
+            "get": {
+                "tags": [
+                    "Products"
+                ],
+                "description": "Returns a product by the Product Code",
+                "operationId": "getProduct",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "description": "Product Code",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful get product response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/Product"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/Result"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Products"
+                ],
+                "description": "Updates a product in the bakery.",
+                "operationId": "updateProduct",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "description": "Product Code",
+                        "type": "string"
+                    }
+                ],
+                "requestBody": {
+                    "description": "Product Object",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/definitions/Result"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful update product response.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/Result"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/Result"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Products"
+                ],
+                "description": "Deletes a product by the Product Code",
+                "operationId": "deleteProduct",
+                "parameters": [
+                    {
+                        "name": "code",
+                        "in": "path",
+                        "required": true,
+                        "description": "Product Code",
+                        "type": "string"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful delete product response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/Result"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/Result"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "PackagingOption": {
+            "type": "object",
+            "required": ["count", "price"],
+            "properties": {
+                "count": {
+                    "type": "number",
+                    "description": "Packaging Option Count"
+                },
+                "price": {
+                    "type": "number",
+                    "description": "Packaging Option Price"
+                }
+            }
+        },
+        "Product": {
+            "type": "object",
+            "required": ["name", "code", "packaging_options"],
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "Product Name"
+                },
+                "code": {
+                    "type": "string",
+                    "description": "Product Code"
+                },
+                "packaging_options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/PackagingOption"
+                    }
+                }
+            }
+        },
+        "Products": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/Product"
+            }
+        },
+        "Result": {
+            "type": "object",
+            "required": ["message", "code"],
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "description": "Operation result"
+                },
+                "code": {
+                    "type": "string",
+                    "description": "Product Code"
+                }
+            }
+        }
+    }
+}
