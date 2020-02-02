@@ -8,3 +8,8 @@ export interface ProductPackaging {
     options: Packaging[],
     reminder: number
 };
+
+export interface ProductOrder {
+    count: number,
+    code: string
+};

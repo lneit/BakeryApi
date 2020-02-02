@@ -1,207 +1,135 @@
-import { calcPacks, calcOptions, findProductPackaging } from '../utils/orders';
-import { PackagingOption } from '../models/products';
+import app from '../server';
+import supertest from 'supertest';
+import { Product, PackagingOption } from '../models/products';
+import { Packaging, ProductOrder } from '../models/orders';
+import { PRODUCTS as products } from '../controllers/data';
 
-describe('Test Packaging Options', () => {
-    const packagingOptions: PackagingOption[] = [
+const request = supertest(app);
+
+const baseURL = '/api/v1';
+
+const PRODUCT1 = {
+    code: 'VS',
+    name: 'Vegemite Scroll',
+    packaging_options: [
         {
-            count: 2,
-            price: 6
+            count: 3,
+            price: 6.99
         },
         {
             count: 5,
-            price: 10
+            price: 8.99
+        }
+    ]};
+
+const PRODUCT2 = {
+    code: 'BM',
+    name: 'Blueberry Muffin',
+    packaging_options: [
+        {
+            count: 2,
+            price: 9.95
         },
         {
-            count: 3,
-            price: 7
+            count: 5,
+            price: 16.95
+        },
+        {
+            count: 8,
+            price: 24.95
+        }
+    ]};
+
+const PRODUCT3 = {
+    code: 'CR',
+    name: 'Croissant',
+    packaging_options: [
+        {
+            count: 5,
+            price: 9.95
+        },
+        {
+            count: 9,
+            price: 16.99
+        }
+    ]};
+
+describe('Test Orders POST endpoint', () => {
+    const allProducts = [];
+    allProducts.push(new Product(PRODUCT1.code, PRODUCT1.name, PRODUCT1.packaging_options));
+    allProducts.push(new Product(PRODUCT2.code, PRODUCT2.name, PRODUCT2.packaging_options));
+    allProducts.push(new Product(PRODUCT3.code, PRODUCT3.name, PRODUCT3.packaging_options));
+
+    // jest.spyOn(products, 'getAll').mockReturnValue(allProducts);
+
+    const order: ProductOrder[] = [
+        {
+            count: 10,
+            code: 'VS'
+        },
+        {
+            count: 14,
+            code: 'BM'
+        },
+        {
+            count: 13,
+            code: 'CR'
         }
     ];
-    it('Test calculation of packs given the number of products ordered and one packaging option', () => {
-        let [packCount, reminder] = calcPacks(14, 8);
 
-        expect(packCount).toBe(1);
-        expect(reminder).toBe(6);
+    const packagingBreakdown: any[] = [
+        {
+            code: 'VS',
+            count: 10,
+            totalPrice: 17.98,
+            packaging: [
+                {
+                    packs: 2,
+                    count: 5,
+                    price: 8.99
+                }
+            ]
+        },
+        {
+            code: 'BM',
+            count: 14,
+            totalPrice: 54.8,
+            packaging: [
+                {
+                    packs: 1,
+                    count: 8,
+                    price: 24.95
+                },
+                {
+                    packs: 3,
+                    count: 2,
+                    price: 9.95
+                }
+            ]
+        },
+        {
+            code: 'CR',
+            count: 13,
+            totalPrice: 25.85,
+            packaging: [
+                {
+                    packs: 2,
+                    count: 5,
+                    price: 9.95
+                },
+                {
+                    packs: 1,
+                    count: 3,
+                    price: 5.95
+                }
+            ]
+        }
+    ];
 
-        [packCount, reminder] = calcPacks(14, 5);
-        expect(packCount).toBe(2);
-        expect(reminder).toBe(4);
-
-        [packCount, reminder] = calcPacks(1, 2);
-        expect(packCount).toBe(0);
-        expect(reminder).toBe(1);
-    });
-
-    it('Test calculation of pack options given the number of products ordered and a list of packaging options', () => {
-        const {options, reminder} = calcOptions(4, packagingOptions.sort((b, a) => a.count - b.count));
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(1);
-        expect(options.length).toBe(1);
-        expect(options[0].count).toBe(3);
-    });
-    it('Test calculation of pack options given the number of products ordered and a list of packaging options', () => {
-        const {options, reminder} = calcOptions(4, packagingOptions.sort((b, a) => a.count - b.count));
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(1);
-        expect(options.length).toBe(1);
-        expect(options[0].count).toBe(3);
-        expect(options[0].packs).toBe(1);
-    });
-    it('Test 1 item order, unsuccessful', () => {
-        const {options, reminder} = findProductPackaging(1, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(1);
-        expect(options.length).toBe(0);
-    });
-
-    it('Test 2 items order', () => {
-        const {options, reminder} = findProductPackaging(2, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(0);
-        expect(options.length).toBe(1);
-        expect(options[0].count).toBe(2);
-        expect(options[0].packs).toBe(1);
-    });
-    it('Test 3 items order', () => {
-        const {options, reminder} = findProductPackaging(3, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(0);
-        expect(options.length).toBe(1);
-        expect(options[0].count).toBe(3);
-        expect(options[0].packs).toBe(1);
-    });
-    it('Test 4 items order', () => {
-        const {options, reminder} = findProductPackaging(4, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(0);
-        expect(options.length).toBe(1);
-        expect(options[0].count).toBe(2);
-        expect(options[0].packs).toBe(2);
-    });
-    it('Test 5 items order', () => {
-        const {options, reminder} = findProductPackaging(5, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(0);
-        expect(options.length).toBe(1);
-        expect(options[0].count).toBe(5);
-        expect(options[0].packs).toBe(1);
-    });
-    it('Test 6 items order', () => {
-        const {options, reminder} = findProductPackaging(6, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(0);
-        expect(options.length).toBe(1);
-        expect(options[0].count).toBe(3);
-        expect(options[0].packs).toBe(2);
-    });
-    it('Test 7 items order', () => {
-        const {options, reminder} = findProductPackaging(7, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(0);
-        expect(options.length).toBe(2);
-        expect(options[0].count).toBe(5);
-        expect(options[0].packs).toBe(1);
-        expect(options[1].count).toBe(2);
-        expect(options[1].packs).toBe(1);
-    });
-    it('Test 8 items order', () => {
-        const {options, reminder} = findProductPackaging(8, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(0);
-        expect(options.length).toBe(2);
-        expect(options[0].count).toBe(5);
-        expect(options[0].packs).toBe(1);
-        expect(options[1].count).toBe(3);
-        expect(options[1].packs).toBe(1);
-    });
-    it('Test 9 items order', () => {
-        const {options, reminder} = findProductPackaging(9, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(0);
-        expect(options.length).toBe(2);
-        expect(options[0].count).toBe(5);
-        expect(options[0].packs).toBe(1);
-        expect(options[1].count).toBe(2);
-        expect(options[1].packs).toBe(2);
-    });
-    it('Test 10 items order', () => {
-        const {options, reminder} = findProductPackaging(10, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(0);
-        expect(options.length).toBe(1);
-        expect(options[0].count).toBe(5);
-        expect(options[0].packs).toBe(2);
-    });
-    it('Test 11 items order', () => {
-        const {options, reminder} = findProductPackaging(11, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(0);
-        expect(options.length).toBe(2);
-        expect(options[0].count).toBe(3);
-        expect(options[0].packs).toBe(3);
-        expect(options[1].count).toBe(2);
-        expect(options[1].packs).toBe(1);
-    });
-    it('Test 12 items order', () => {
-        const {options, reminder} = findProductPackaging(12, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(0);
-        expect(options.length).toBe(2);
-        expect(options[0].count).toBe(5);
-        expect(options[0].packs).toBe(2);
-        expect(options[1].count).toBe(2);
-        expect(options[1].packs).toBe(1);
-    });
-    it('Test 13 items order', () => {
-        const {options, reminder} = findProductPackaging(13, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(0);
-        expect(options.length).toBe(2);
-        expect(options[0].count).toBe(5);
-        expect(options[0].packs).toBe(2);
-        expect(options[1].count).toBe(3);
-        expect(options[1].packs).toBe(1);
-    });
-    it('Test calculation of pack options given the number of products ordered and a list of packaging options', () => {
-
-        const {options, reminder} = findProductPackaging(14, packagingOptions);
-
-        expect(typeof options).toBe("object");
-        expect(Array.isArray(options)).toBeTruthy();
-        expect(reminder).toBe(0);
-        expect(options.length).toBe(2);
-        expect(options[0].count).toBe(5);
-        expect(options[0].packs).toBe(2);
-        expect(options[1].count).toBe(2);
-        expect(options[1].packs).toBe(2);
+    it('Test packaging breakdown for an order', async done => {
+        const resp = await request.post(`${baseURL}/orders`);
+        expect(resp.status).toBe(200);
+        expect(resp.body.packaging).toContain(packagingBreakdown);
+        done();
     });
 });
