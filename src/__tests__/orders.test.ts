@@ -45,6 +45,10 @@ const PRODUCT3 = {
     name: 'Croissant',
     packaging_options: [
         {
+            count: 3,
+            price: 5.95
+        },
+        {
             count: 5,
             price: 9.95
         },
@@ -55,13 +59,6 @@ const PRODUCT3 = {
     ]};
 
 describe('Test Orders POST endpoint', () => {
-    const allProducts = [];
-    allProducts.push(new Product(PRODUCT1.code, PRODUCT1.name, PRODUCT1.packaging_options));
-    allProducts.push(new Product(PRODUCT2.code, PRODUCT2.name, PRODUCT2.packaging_options));
-    allProducts.push(new Product(PRODUCT3.code, PRODUCT3.name, PRODUCT3.packaging_options));
-
-    // jest.spyOn(products, 'getAll').mockReturnValue(allProducts);
-
     const order: ProductOrder[] = [
         {
             count: 10,
@@ -77,59 +74,101 @@ describe('Test Orders POST endpoint', () => {
         }
     ];
 
-    const packagingBreakdown: any[] = [
-        {
-            code: 'VS',
-            count: 10,
-            totalPrice: 17.98,
-            packaging: [
-                {
-                    packs: 2,
-                    count: 5,
-                    price: 8.99
-                }
-            ]
-        },
-        {
-            code: 'BM',
-            count: 14,
-            totalPrice: 54.8,
-            packaging: [
-                {
-                    packs: 1,
-                    count: 8,
-                    price: 24.95
-                },
-                {
-                    packs: 3,
-                    count: 2,
-                    price: 9.95
-                }
-            ]
-        },
-        {
-            code: 'CR',
-            count: 13,
-            totalPrice: 25.85,
-            packaging: [
-                {
-                    packs: 2,
-                    count: 5,
-                    price: 9.95
-                },
-                {
-                    packs: 1,
-                    count: 3,
-                    price: 5.95
-                }
-            ]
-        }
-    ];
+    it('Test bad order', async done => {
+        const resp = await request
+            .post(`${baseURL}/orders`)
+           
+        expect(resp.status).toBe(400);
+        expect(resp.body.message).toContain('Bad order format. Please refer to POST /orders API definition.');
+        done();
+    });
 
-    it('Test packaging breakdown for an order', async done => {
-        const resp = await request.post(`${baseURL}/orders`);
+    it('Test product code not found', async done => {
+        jest.spyOn(products, 'get').mockReturnValueOnce(undefined);
+
+        const resp = await request
+            .post(`${baseURL}/orders`)
+            .send(order)
+            .set('Accept', 'application/json');
+           
+        expect(resp.status).toBe(422);
+        expect(resp.body.message).toContain('Could not find a product');
+        expect(resp.body.code).toBe('VS');
+        done();
+    });
+
+    it('Test product packaging that matches the order not found', async done => {
+        const modifiedProduct = {
+            code: 'VS',
+            name: 'Vegemite Scroll',
+            packaging_options: [
+                {
+                    count: 3,
+                    price: 6.99
+                }
+            ]};
+        jest.spyOn(products, 'get')
+            .mockReturnValueOnce(new Product(modifiedProduct.code, modifiedProduct.name, modifiedProduct.packaging_options))
+            .mockReturnValueOnce(new Product(PRODUCT2.code, PRODUCT2.name, PRODUCT2.packaging_options))
+            .mockReturnValueOnce(new Product(PRODUCT3.code, PRODUCT3.name, PRODUCT3.packaging_options));
+
+
+        const resp = await request
+            .post(`${baseURL}/orders`)
+            .send(order)
+            .set('Accept', 'application/json');
+           
+        expect(resp.status).toBe(422);
+        expect(resp.body.message).toContain('Could not find packaging');
+        expect(resp.body.code).toBe('VS');
+        done();
+    });
+
+    it.only('Test packaging breakdown for an order', async done => {
+        jest.spyOn(products, 'get')
+            .mockReturnValueOnce(new Product(PRODUCT1.code, PRODUCT1.name, PRODUCT1.packaging_options))
+            .mockReturnValueOnce(new Product(PRODUCT2.code, PRODUCT2.name, PRODUCT2.packaging_options))
+            .mockReturnValueOnce(new Product(PRODUCT3.code, PRODUCT3.name, PRODUCT3.packaging_options));
+
+        const resp = await request
+            .post(`${baseURL}/orders`)
+            .send(order)
+            .set('Accept', 'application/json');
+
+        const result: any[] = resp.body;
+
         expect(resp.status).toBe(200);
-        expect(resp.body.packaging).toContain(packagingBreakdown);
+        expect(Array.isArray(result)).toBeTruthy();
+        expect(result.length).toBe(3);
+
+        const vsProductPack = result.find(el => el.code === 'VS');
+        const bmProductPack = result.find(el => el.code === 'BM');
+        const crProductPack = result.find(el => el.code === 'CR');
+
+        expect(vsProductPack.count).toBe(10);
+        expect(vsProductPack.totalPrice).toBe(17.98);
+        expect(vsProductPack.packaging[0].packs).toBe(2);
+        expect(vsProductPack.packaging[0].count).toBe(5);
+        expect(vsProductPack.packaging[0].price).toBe(8.99);
+
+        expect(bmProductPack.count).toBe(14);
+        expect(bmProductPack.totalPrice).toBe(54.8);
+        expect(bmProductPack.packaging[0].packs).toBe(1);
+        expect(bmProductPack.packaging[0].count).toBe(8);
+        expect(bmProductPack.packaging[0].price).toBe(24.95);
+        expect(bmProductPack.packaging[1].packs).toBe(3);
+        expect(bmProductPack.packaging[1].count).toBe(2);
+        expect(bmProductPack.packaging[1].price).toBe(9.95);
+
+        expect(crProductPack.count).toBe(13);
+        expect(crProductPack.totalPrice).toBeCloseTo(25.85);
+        expect(crProductPack.packaging[0].packs).toBe(2);
+        expect(crProductPack.packaging[0].count).toBe(5);
+        expect(crProductPack.packaging[0].price).toBe(9.95);
+        expect(crProductPack.packaging[1].packs).toBe(1);
+        expect(crProductPack.packaging[1].count).toBe(3);
+        expect(crProductPack.packaging[1].price).toBe(5.95);
+
         done();
     });
 });
