@@ -7,7 +7,7 @@ Please run the API server locally using ```npm start``` from the project root di
 
 The documentation is generated using Swagger and OpenAPI. Therefore the API-s are consumable using the above link.
 
-Alternatively, please use swagger.json defined at the project root level as an API spec.
+Alternatively, please use ```swagger.json``` defined at ```../src``` level as an API spec.
 
 ## Test
 Run unit tests using the following command from the project root directory.
