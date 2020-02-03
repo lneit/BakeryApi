@@ -55,21 +55,21 @@ export const findProductPackaging = (ordered: number, packagingOptions: Packagin
     let result: ProductPackaging = {options: [], reminder: ordered};
 
     // Filter packaging options to exclude any that are larger than the ordered number
-    let opts: PackagingOption[] = packagingOptions.filter(opt => opt.count <= ordered);
+    const opts: PackagingOption[] = packagingOptions.filter(opt => opt.count <= ordered);
     if (opts.length <= 0) {
         return result;
     }
-    let permutations = perm(opts);
+    const permutations = perm(opts);
     let index = 0;
 
     let minPrice = -1;
     let minPacks = -1;
     while (index < permutations.length) {
-        let productPackaging = calcOptions(ordered, permutations[index]);
+        const productPackaging = calcOptions(ordered, permutations[index]);
 
         if (productPackaging.reminder <= 0) {
-            let price = productPackaging.options.reduce((sum, opt) => sum + ((opt.packs * opt.price) || 0), 0);
-            let packs = productPackaging.options.reduce((sum, opt) => sum + ((opt.packs) || 0), 0);
+            const price = productPackaging.options.reduce((sum, opt) => sum + ((opt.packs * opt.price) || 0), 0);
+            const packs = productPackaging.options.reduce((sum, opt) => sum + ((opt.packs) || 0), 0);
             if ((minPacks < 0 || packs < minPacks) || (minPacks === packs && price < minPrice)) {
                 minPacks = packs;
                 minPrice = price;

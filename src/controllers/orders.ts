@@ -13,15 +13,15 @@ export const placeOrder: RequestHandler = (req, resp, next) => {
 
     const result: OrderPackagingResult[] = [];
 
-    for (let {count, code} of order) {
+    for (const {count, code} of order) {
         const product = PRODUCTS.get(code);
         if (!!!product) {
             resp.status(422).json({message: "Could not find a product", code});
             return;
         }
 
-        let {options, reminder} = findProductPackaging(count, product.packagingOptions);
-        
+        const {options, reminder} = findProductPackaging(count, product.packagingOptions);
+
         if (reminder !== 0) {
         resp.status(422).json({message: "Could not find packaging for a product product", code});
             return;

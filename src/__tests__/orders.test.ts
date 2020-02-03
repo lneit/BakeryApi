@@ -76,12 +76,12 @@ describe('Test Orders POST endpoint', () => {
     beforeEach(() => {
         jest.resetAllMocks();
     });
-    
+
 
     it('Test bad order', async done => {
         const resp = await request
             .post(`${baseURL}/orders`)
-           
+
         expect(resp.status).toBe(400);
         done();
     });
@@ -93,7 +93,7 @@ describe('Test Orders POST endpoint', () => {
             .post(`${baseURL}/orders`)
             .send(order)
             .set('Accept', 'application/json');
-           
+
         expect(resp.status).toBe(422);
         expect(resp.body.message).toContain('Could not find a product');
         expect(resp.body.code).toBe('VS');
@@ -119,7 +119,7 @@ describe('Test Orders POST endpoint', () => {
             .post(`${baseURL}/orders`)
             .send(order)
             .set('Accept', 'application/json');
-           
+
         expect(resp.status).toBe(422);
         expect(resp.body.message).toContain('Could not find packaging');
         expect(resp.body.code).toBe('VS');
