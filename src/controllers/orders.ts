@@ -1,5 +1,5 @@
 import { RequestHandler } from 'express';
-import { ProductOrder } from '../models/orders';
+import { ProductOrder, OrderPackagingResult } from '../models/orders';
 import { findProductPackaging } from '../utils/orders';
 import { PRODUCTS } from './data';
 
@@ -11,7 +11,7 @@ export const placeOrder: RequestHandler = (req, resp, next) => {
         return;
     }
 
-    const result: any[] = [];
+    const result: OrderPackagingResult[] = [];
 
     for (let {count, code} of order) {
         const product = PRODUCTS.get(code);
@@ -23,7 +23,7 @@ export const placeOrder: RequestHandler = (req, resp, next) => {
         let {options, reminder} = findProductPackaging(count, product.packagingOptions);
         
         if (reminder !== 0) {
-            resp.status(422).json({message: "Could not find packaging for a product product", code});
+        resp.status(422).json({message: "Could not find packaging for a product product", code});
             return;
         }
 

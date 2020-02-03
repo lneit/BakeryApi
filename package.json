@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon dist/app.js",
-    "test": "jest",
+    "test": "jest --no-cache",
     "lint": "tslint --project . --fix"
   },
   "author": "Ludmila Neitman",

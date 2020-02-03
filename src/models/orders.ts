@@ -13,3 +13,10 @@ export interface ProductOrder {
     count: number,
     code: string
 };
+
+export interface OrderPackagingResult {
+    code: string,
+    count: number,
+    totalPrice: number,
+    packaging: Packaging[]
+};

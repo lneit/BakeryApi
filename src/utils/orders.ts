@@ -1,9 +1,9 @@
 import { PackagingOption } from '../models/products';
-import { Packaging, ProductPackaging } from '../models/orders';
+import { ProductPackaging } from '../models/orders';
 
 // Calculates the amount of packages and the reminder of items given the number
 // of items (count) and one packaging option.
-export const calcPacks = (count: number, option:  number): [number, number] => {
+const calcPacks = (count: number, option:  number): [number, number] => {
     const reminder = count % option;
     let packCount;
     if (reminder === 0) {
@@ -18,7 +18,7 @@ export const calcPacks = (count: number, option:  number): [number, number] => {
 
 // Calculates packaging options for an ordered number of items (ordered) in one go
 // over given packagingOptions list.
-export const calcOptions = (ordered: number, packagingOptions: PackagingOption[]): ProductPackaging => {
+const calcOptions = (ordered: number, packagingOptions: PackagingOption[]): ProductPackaging => {
     const options: ProductPackaging = packagingOptions.reduce((packaging: ProductPackaging, {count, price}) => {
         if (packaging.reminder < count) {
             return packaging;
@@ -46,37 +46,37 @@ export const calcOptions = (ordered: number, packagingOptions: PackagingOption[]
     return options;
 };
 
+// Returns array permutations
+const perm = (a: any[]): any[] => a.length ? a.reduce((r, v, i) => [ ...r, ...perm([ ...a.slice(0, i), ...a.slice(i + 1) ]).map((x: any) => [ v, ...x ])], []) : [[]]
+
 // Finds feasible product packaging option.
 export const findProductPackaging = (ordered: number, packagingOptions: PackagingOption[]): ProductPackaging => {
-    // Filter packaging options to exclude any that are larger than the ordered number
-    let updatedPackagingOptions: PackagingOption[] = packagingOptions.filter(opt => opt.count <= ordered);
-
-    // Sort in the descending order by count
-    updatedPackagingOptions.sort((b, a) => a.count - b.count);
-
     // Initialise the resulting product packaging. Set the reminder to the amount of ordered items.
-    let productPackaging: ProductPackaging = {options: [], reminder: ordered};
+    let result: ProductPackaging = {options: [], reminder: ordered};
 
-    while (updatedPackagingOptions.length > 0) {
-        productPackaging = calcOptions(ordered, updatedPackagingOptions);
+    // Filter packaging options to exclude any that are larger than the ordered number
+    let opts: PackagingOption[] = packagingOptions.filter(opt => opt.count <= ordered);
+    if (opts.length <= 0) {
+        return result;
+    }
+    let permutations = perm(opts);
+    let index = 0;
+
+    let minPrice = -1;
+    let minPacks = -1;
+    while (index < permutations.length) {
+        let productPackaging = calcOptions(ordered, permutations[index]);
 
         if (productPackaging.reminder <= 0) {
-            break;
+            let price = productPackaging.options.reduce((sum, opt) => sum + ((opt.packs * opt.price) || 0), 0);
+            let packs = productPackaging.options.reduce((sum, opt) => sum + ((opt.packs) || 0), 0);
+            if ((minPacks < 0 || packs < minPacks) || (minPacks === packs && price < minPrice)) {
+                minPacks = packs;
+                minPrice = price;
+                result = productPackaging;
+            }
         }
-
-        // Update the packaging options reducing the list of options by the
-        // last element's count option or, if undefined, shifting the first
-        // option out.
-
-        // Find the last element from product packaging options if there is.
-        const last: Packaging[] = productPackaging.options.slice(-1);
-        let count: number|undefined;
-        if (last) {
-            count = last[0].count;
-            updatedPackagingOptions = updatedPackagingOptions.filter(opt => opt.count !== count);
-        } else {
-            updatedPackagingOptions.shift();
-        }
+        index +=1;
     }
-    return productPackaging;
+    return result;
 }

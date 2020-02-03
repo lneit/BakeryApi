@@ -17,7 +17,7 @@
     },
     "servers": [
         {
-            "url": "http://localhost:3001/api/v1",
+            "url": "http://localhost:3000/api/v1",
             "description": "Local server"
         }
     ],
@@ -214,6 +214,58 @@
                     }
                 }
             }
+        },
+        "/orders": {
+            "post": {
+                "tags": [
+                    "Orders"
+                ],
+                "description": "Places a new order.",
+                "operationId": "placeOrder",
+                "requestBody": {
+                    "description": "Order Object",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/definitions/Order"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful place order response.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/OrderResult"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Format",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/Result"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/definitions/Result"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -269,6 +321,70 @@
                     "type": "string",
                     "description": "Product Code"
                 }
+            }
+        },
+        "ProductOrder": {
+            "type": "object",
+            "required": ["count", "code"],
+            "properties": {
+                "count": {
+                    "type": "number",
+                    "description": "Packaging Option Count"
+                },
+                "code": {
+                    "type": "number",
+                    "description": "Product Code"
+                }
+            }
+        },
+        "Order": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ProductOrder"
+            }
+        },
+        "Packaging": {
+            "type": "object",
+            "required": ["packs", "count", "price"],
+            "properties": {
+                "count": {
+                    "type": "number",
+                    "description": "Number of items in the package"
+                },
+                "packs": {
+                    "type": "number",
+                    "description": "Number of packs"
+                },
+                "price": {
+                    "type": "number",
+                    "description": "Price of one package"
+                }
+            }
+        },
+        "ProductPackaging": {
+            "code": {
+                "type": "number",
+                "description": "Product Code"
+            },
+            "count": {
+                "type": "number",
+                "description": "Packaging Option Count"
+            },
+            "totalPrice": {
+                "type": "number",
+                "description": "Total price for this product order"
+            },
+            "packaging": {
+                "type": "array",
+                "items": {
+                    "$ref": "#/definitions/Packaging"
+                }
+            }
+        },
+        "OrderResult": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/ProductPackaging"
             }
         }
     }
