@@ -1,7 +1,7 @@
 # Bakery Api
 API server to help a bakery manage its products and serve orders.
 
-The solution represents the RESTful API for creating, retrieving, deleting, and modifying bakery products as well as serviving customer orders by determining the cost and packaging breakdown for each requested product and returning it in the response.
+The solution represents the RESTful API for creating, retrieving, deleting, and modifying bakery products as well as serving customer orders by determining the cost and packaging breakdown for each requested product and returning it in the response.
 
 ## Known Limitations 
 The products are stored in memory instead of a database.
