@@ -28,7 +28,7 @@ export const createProduct: RequestHandler = (req, resp, next) => {
     };
 
     if (PRODUCTS.get(code)) {
-        resp.status(422).json({message: "Product already exists", code});
+        resp.status(409).json({message: "Product already exists", code});
         return;
     }
 

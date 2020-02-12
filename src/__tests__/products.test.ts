@@ -120,7 +120,7 @@ describe('Test products POST endpoint', () => {
 
         expect(getProductSpy).toBeCalled();
         expect(addProductSpy).not.toBeCalled();
-        expect(resp.status).toBe(422);
+        expect(resp.status).toBe(409);
         expect(resp.body.code).toBe(code);
         expect(resp.body.message).toBe('Product already exists');
         done();
