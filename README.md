@@ -17,11 +17,15 @@ Alternatively, please use ```swagger.json``` defined at ```../src``` level as an
 ## Test
 Run unit tests using the following command from the project root directory.
 ```
+npm install
+tsc
 npm test
 ```
 
 ## Run
 Run Bakery Products API server using the following command from the project root directory.
 ```
+npm install
+tsc
 npm start
 ```
