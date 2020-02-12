@@ -1,4 +1,4 @@
-import { Product } from '../models/products';
+import { Product } from './products';
 
 // A primitive implementation of Products data store
 export class Products {

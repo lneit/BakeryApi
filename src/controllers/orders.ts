@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import { ProductOrder, OrderPackagingResult } from '../models/orders';
 import { findProductPackaging } from '../utils/orders';
-import { PRODUCTS } from './data';
+import { PRODUCTS } from '../models/productStore';
 
 export const placeOrder: RequestHandler = (req, resp, next) => {
     const order = req.body as ProductOrder[];

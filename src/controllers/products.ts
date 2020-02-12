@@ -1,6 +1,6 @@
 import { RequestHandler } from 'express';
 import { Product } from '../models/products';
-import { PRODUCTS } from './data';
+import { PRODUCTS } from '../models/productStore';
 
 export const getProducts: RequestHandler = (req, resp, next) => {
     resp.status(200).json(PRODUCTS.getAll());
