@@ -108,6 +108,22 @@ describe('Test products POST endpoint', () => {
         expect(resp.body.message).toBe('Created the product');
         done();
     });
+    it('Test request bad format', async done => {
+        const badProduct = {
+            code: 'XX',
+            name: 'XXX'
+        };
+
+        const resp = await request
+            .post(`${baseURL}/products`)
+            .send(badProduct)
+            .set('Accept', 'application/json');
+
+        expect(addProductSpy).not.toBeCalled();
+        expect(resp.status).toBe(400);
+        expect(resp.body.message).toBe('Invalid request data');
+        done();
+    });
     it('Test unsuccessful creation of a product with already existing product code', async done => {
         const {code, name, packaging_options} = PRODUCT1;
         const getProductSpy = jest.spyOn(products, 'get').mockReturnValue(

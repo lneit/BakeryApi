@@ -5,9 +5,11 @@ import {
     getProducts,
     deleteProduct,
     updateProduct } from '../controllers/products';
+import { validateRequest } from '../middlewares/apiValidation';
+
 const router = Router();
 
-router.post('/', createProduct);
+router.post('/', validateRequest('/products'), createProduct);
 
 router.get('/:code', getProduct);
 
